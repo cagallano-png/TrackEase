@@ -1,13 +1,14 @@
 {
   "name": "financial-tracker-project",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Student Financial Tracker",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "cagallano",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^2.2.0",
