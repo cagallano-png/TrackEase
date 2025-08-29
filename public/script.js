@@ -5,12 +5,14 @@ const format = (num) =>
 
 // ==== State ====
 let state = {
-  items: JSON.parse(localStorage.getItem("items") || "[]")
+  items: JSON.parse(localStorage.getItem("items") || "[]"),
+  user: JSON.parse(localStorage.getItem("user") || "null") // === AUTH ===
 };
 
 // ==== Save State ====
 function save() {
   localStorage.setItem("items", JSON.stringify(state.items));
+  localStorage.setItem("user", JSON.stringify(state.user)); // === AUTH ===
 }
 
 // ==== Delete Item ====
@@ -24,6 +26,7 @@ function deleteItem(id) {
 let expensePieChart, monthlyBarChart;
 
 function updateCharts() {
+  // (your existing chart code unchanged) ...
   // ---- Expense Pie (this month) ----
   const now = new Date();
   const ym = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
@@ -39,28 +42,8 @@ function updateCharts() {
   if (expensePieChart) expensePieChart.destroy();
   expensePieChart = new Chart($("#expensePie"), {
     type: "pie",
-    data: {
-      labels: pieLabels,
-      datasets: [
-        {
-          data: pieData,
-          backgroundColor: [
-            "#ef4444",
-            "#f59e0b",
-            "#3b82f6",
-            "#22c55e",
-            "#8b5cf6",
-            "#ec4899",
-            "#14b8a6"
-          ]
-        }
-      ]
-    },
-    options: {
-      plugins: {
-        legend: { labels: { color: "#e5e7eb" } }
-      }
-    }
+    data: { labels: pieLabels, datasets: [{ data: pieData, backgroundColor: ["#ef4444","#f59e0b","#3b82f6","#22c55e","#8b5cf6","#ec4899","#14b8a6"] }] },
+    options: { plugins: { legend: { labels: { color: "#e5e7eb" } } } }
   });
 
   // ---- Monthly Income vs Expense Bar ----
@@ -79,36 +62,18 @@ function updateCharts() {
   if (monthlyBarChart) monthlyBarChart.destroy();
   monthlyBarChart = new Chart($("#monthlyBar"), {
     type: "bar",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Income",
-          data: incomeData,
-          backgroundColor: "#22c55e"
-        },
-        {
-          label: "Expenses",
-          data: expenseData,
-          backgroundColor: "#ef4444"
-        }
-      ]
-    },
+    data: { labels, datasets: [{ label: "Income", data: incomeData, backgroundColor: "#22c55e" }, { label: "Expenses", data: expenseData, backgroundColor: "#ef4444" }] },
     options: {
       responsive: true,
-      plugins: {
-        legend: { labels: { color: "#e5e7eb" } }
-      },
-      scales: {
-        x: { ticks: { color: "#e5e7eb" } },
-        y: { ticks: { color: "#e5e7eb" } }
-      }
+      plugins: { legend: { labels: { color: "#e5e7eb" } } },
+      scales: { x: { ticks: { color: "#e5e7eb" } }, y: { ticks: { color: "#e5e7eb" } } }
     }
   });
 }
 
 // ==== Render ====
 function render() {
+  // (your existing render code unchanged)
   // monthly summary
   const monthly = {};
   for (const it of state.items) {
@@ -124,18 +89,12 @@ function render() {
   for (const k of keys) {
     const row = document.createElement("tr");
     const bal = monthly[k].income - monthly[k].expense;
-    row.innerHTML = `
-      <td>${k}</td>
-      <td class="amount mono">${format(monthly[k].income)}</td>
-      <td class="amount mono">${format(monthly[k].expense)}</td>
-      <td class="amount mono">${format(bal)}</td>
-    `;
+    row.innerHTML = `<td>${k}</td><td class="amount mono">${format(monthly[k].income)}</td><td class="amount mono">${format(monthly[k].expense)}</td><td class="amount mono">${format(bal)}</td>`;
     mbody.appendChild(row);
   }
 
   // totals
-  let income = 0,
-    expense = 0;
+  let income = 0, expense = 0;
   for (const it of state.items) {
     if (it.type === "income") income += it.amount;
     else expense += it.amount;
@@ -148,54 +107,24 @@ function render() {
   const todayStr = new Date().toISOString().split("T")[0];
   let dailyExpense = 0;
   for (const it of state.items) {
-    if (it.type === "expense" && it.date.startsWith(todayStr)) {
-      dailyExpense += it.amount;
-    }
+    if (it.type === "expense" && it.date.startsWith(todayStr)) dailyExpense += it.amount;
   }
   $("#dailyExpense").textContent = format(dailyExpense);
 
-  // history table
+  // history
   const tbody = $("#tbody");
   tbody.innerHTML = "";
   const sorted = [...state.items].sort((a, b) => new Date(b.date) - new Date(a.date));
   for (const it of sorted) {
     const tr = document.createElement("tr");
-
-    const tdDate = document.createElement("td");
-    tdDate.textContent = new Date(it.date).toLocaleString();
-    tr.appendChild(tdDate);
-
-    const tdType = document.createElement("td");
-    const pill = document.createElement("span");
-    pill.className = "pill " + it.type;
-    pill.textContent = it.type;
-    tdType.appendChild(pill);
-    tr.appendChild(tdType);
-
-    const tdCat = document.createElement("td");
-    tdCat.textContent = it.category;
-    tr.appendChild(tdCat);
-
-    const tdAmt = document.createElement("td");
-    tdAmt.className = "amount mono";
-    tdAmt.textContent = it.amount.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-    tr.appendChild(tdAmt);
-
-    const tdNote = document.createElement("td");
-    tdNote.textContent = it.note || "";
-    tr.appendChild(tdNote);
-
-    const tdAct = document.createElement("td");
-    const del = document.createElement("button");
-    del.className = "btn-outline";
-    del.textContent = "Delete";
-    del.addEventListener("click", () => deleteItem(it.id));
-    tdAct.appendChild(del);
-    tr.appendChild(tdAct);
-
+    tr.innerHTML = `
+      <td>${new Date(it.date).toLocaleString()}</td>
+      <td><span class="pill ${it.type}">${it.type}</span></td>
+      <td>${it.category}</td>
+      <td class="amount mono">${it.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+      <td>${it.note || ""}</td>
+      <td><button class="btn-outline">Delete</button></td>`;
+    tr.querySelector("button").addEventListener("click", () => deleteItem(it.id));
     tbody.appendChild(tr);
   }
 
@@ -220,7 +149,6 @@ $("#addBtn").addEventListener("click", () => {
   save();
   render();
 
-  // reset form
   $("#amount").value = "";
   $("#note").value = "";
 });
@@ -259,5 +187,39 @@ for (const c of categories) {
   catSelect.appendChild(opt);
 }
 
+// ==== AUTH ====
+function updateAuthUI() {
+  if (state.user) {
+    $("#authSection").style.display = "none";
+    $("#app").style.display = "block";
+  } else {
+    $("#authSection").style.display = "block";
+    $("#app").style.display = "none";
+  }
+}
+
+$("#loginBtn").addEventListener("click", () => {
+  const email = $("#authEmail").value.trim();
+  const pass = $("#authPassword").value.trim();
+  if (!email || !pass) return alert("Enter email and password");
+  // fake login
+  state.user = { email };
+  save();
+  updateAuthUI();
+  render();
+});
+
+$("#registerBtn").addEventListener("click", () => {
+  const email = $("#authEmail").value.trim();
+  const pass = $("#authPassword").value.trim();
+  if (!email || !pass) return alert("Enter email and password");
+  // fake register = just store email
+  state.user = { email };
+  save();
+  updateAuthUI();
+  render();
+});
+
 // ==== Init ====
+updateAuthUI();
 render();

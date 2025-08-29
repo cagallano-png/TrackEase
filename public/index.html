@@ -24,16 +24,16 @@
       color: var(--text);
     }
     header {
-      padding: 28px 24px; /* larger padding */
+      padding: 28px 24px;
       border-bottom: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.6); /* transparent glass */
+      background: rgba(15, 23, 42, 0.6);
       backdrop-filter: blur(10px);
       position: sticky; top: 0; z-index: 60;
       display: flex; align-items: center; justify-content: center;
     }
     h1 {
       margin: 0;
-      font-size: 36px; /* larger title */
+      font-size: 36px;
       font-weight: 900;
       letter-spacing: 1px;
       background: linear-gradient(90deg, #22c55e, #3b82f6);
@@ -43,19 +43,12 @@
     }
     .container { max-width: 1100px; margin: 0 auto; padding: 18px; }
     .grid { display: grid; gap: 12px; }
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 12px;
-    }
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
     .card {
       background: var(--card); border: 1px solid var(--border); border-radius: 16px;
       padding: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);
     }
-    .card h3 {
-      margin: 0 0 6px 0; color: var(--muted); font-weight: 600;
-      font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px;
-    }
+    .card h3 { margin: 0 0 6px 0; color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.6px; }
     .big { font-size: 22px; font-weight: 800; }
     .form { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
     .form > div { flex: 1; min-width: 150px; }
@@ -80,30 +73,16 @@
     .right { margin-left: auto; }
     .mono { font-variant-numeric: tabular-nums; font-family: ui-monospace, monospace; }
 
-    /* Desktop sticky totals */
-    .sticky-cards {
-      position: sticky;
-      top: 80px; /* adjusted for larger header */
-      z-index: 40;
-      background: rgba(15, 23, 42, 0.9);
-      backdrop-filter: blur(8px);
-      padding: 10px 0;
-    }
+    .sticky-cards { position: sticky; top: 80px; z-index: 40; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(8px); padding: 10px 0; }
+    .card-daily { grid-column: span 3; }
 
-    /* Today's Expenses full width */
-    .card-daily {
-      grid-column: span 3; /* stretch across all columns */
-    }
-
-    /* Mobile adjustments */
     @media (max-width: 900px) {
       .cards { grid-template-columns: 1fr; position: static; }
       .form { flex-direction: column; }
-      .sticky-cards { display: none; } /* hide full cards on mobile */
+      .sticky-cards { display: none; }
       .card-daily { grid-column: auto; }
     }
 
-    /* Highlight cards */
     .card.card-income { background: rgba(22, 163, 74, 0.15); border: 1px solid #22c55e; }
     .card.card-expense { background: rgba(220, 38, 38, 0.15); border: 1px solid #ef4444; }
     .card.card-balance { background: rgba(202, 138, 4, 0.15); border: 1px solid #f59e0b; }
@@ -120,59 +99,75 @@
   </header>
 
   <main class="container grid">
-    <!-- Totals (desktop/laptop) -->
-    <section class="sticky-cards">
-      <div class="cards">
-        <div class="card card-income"><h3>Total Income</h3><div id="totalIncome" class="big mono">₱0.00</div></div>
-        <div class="card card-expense"><h3>Total Expenses</h3><div id="totalExpense" class="big mono">₱0.00</div></div>
-        <div class="card card-balance"><h3>Balance</h3><div id="balance" class="big mono">₱0.00</div></div>
-        <div class="card card-daily"><h3>Today's Expenses</h3><div id="dailyExpense" class="big mono">₱0.00</div></div>
-      </div>
-    </section>
-
-    <!-- Add Transaction -->
-    <section class="card">
-      <div class="toolbar" style="margin-bottom:10px">
-        <div class="sub">Add Transaction</div>
-        <span class="right"></span>
-        <button id="exportCsvBtn" class="btn-outline">Export CSV</button>
-        <button id="clearAllBtn" class="btn-danger">Clear All</button>
-      </div>
+    <!-- 🔑 Auth Section -->
+    <section class="card" id="authSection">
+      <h3>Login / Register</h3>
       <div class="form">
-        <div><label for="type">Type</label><select id="type"><option value="expense">Expense</option><option value="income">Income</option></select></div>
-        <div><label for="category">Category</label><select id="category"></select></div>
-        <div><label for="amount">Amount</label><input id="amount" type="number" step="0.01" placeholder="0.00"></div>
-        <div><label for="note">Note</label><input id="note" type="text" placeholder="e.g., lunch, jeepney, book"></div>
-        <div><label for="date">Date/Time</label><input id="date" type="datetime-local"></div>
-        <div><button id="addBtn" class="btn-primary">Add</button></div>
+        <div><label for="authEmail">Email</label><input id="authEmail" type="email" placeholder="you@example.com"></div>
+        <div><label for="authPassword">Password</label><input id="authPassword" type="password" placeholder="••••••"></div>
+        <div>
+          <button id="loginBtn" class="btn-primary">Login</button>
+          <button id="registerBtn" class="btn-outline">Register</button>
+          <button id="logoutBtn" class="btn-danger" style="display:none">Logout</button>
+        </div>
       </div>
     </section>
 
-    <!-- History -->
-    <section class="card">
-      <div class="toolbar" style="margin-bottom:10px"><div class="sub">History</div></div>
-      <div style="overflow:auto">
-        <table id="table">
-          <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Note</th><th></th></tr></thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-    </section>
+    <div id="app">
+      <!-- Totals -->
+      <section class="sticky-cards">
+        <div class="cards">
+          <div class="card card-income"><h3>Total Income</h3><div id="totalIncome" class="big mono">₱0.00</div></div>
+          <div class="card card-expense"><h3>Total Expenses</h3><div id="totalExpense" class="big mono">₱0.00</div></div>
+          <div class="card card-balance"><h3>Balance</h3><div id="balance" class="big mono">₱0.00</div></div>
+          <div class="card card-daily"><h3>Today's Expenses</h3><div id="dailyExpense" class="big mono">₱0.00</div></div>
+        </div>
+      </section>
 
-    <!-- Monthly Summary -->
-    <section class="card">
-      <div class="toolbar" style="margin-bottom:10px"><div class="sub">Monthly Summary</div></div>
-      <div style="overflow:auto">
-        <table id="monthlySummary">
-          <thead><tr><th>Month</th><th>Total Income</th><th>Total Expenses</th><th>Balance</th></tr></thead>
-          <tbody id="monthlyBody"></tbody>
-        </table>
-      </div>
-    </section>
+      <!-- Add Transaction -->
+      <section class="card">
+        <div class="toolbar" style="margin-bottom:10px">
+          <div class="sub">Add Transaction</div>
+          <span class="right"></span>
+          <button id="exportCsvBtn" class="btn-outline">Export CSV</button>
+          <button id="clearAllBtn" class="btn-danger">Clear All</button>
+        </div>
+        <div class="form">
+          <div><label for="type">Type</label><select id="type"><option value="expense">Expense</option><option value="income">Income</option></select></div>
+          <div><label for="category">Category</label><select id="category"></select></div>
+          <div><label for="amount">Amount</label><input id="amount" type="number" step="0.01" placeholder="0.00"></div>
+          <div><label for="note">Note</label><input id="note" type="text" placeholder="e.g., lunch, jeepney, book"></div>
+          <div><label for="date">Date/Time</label><input id="date" type="datetime-local"></div>
+          <div><button id="addBtn" class="btn-primary">Add</button></div>
+        </div>
+      </section>
 
-    <!-- Charts -->
-    <section class="card"><h3>Expense Breakdown (This Month)</h3><canvas id="expensePie" style="max-height:300px;"></canvas></section>
-    <section class="card"><h3>Income vs Expenses (Monthly)</h3><canvas id="monthlyBar" style="max-height:300px;"></canvas></section>
+      <!-- History -->
+      <section class="card">
+        <div class="toolbar" style="margin-bottom:10px"><div class="sub">History</div></div>
+        <div style="overflow:auto">
+          <table id="table">
+            <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Note</th><th></th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Monthly Summary -->
+      <section class="card">
+        <div class="toolbar" style="margin-bottom:10px"><div class="sub">Monthly Summary</div></div>
+        <div style="overflow:auto">
+          <table id="monthlySummary">
+            <thead><tr><th>Month</th><th>Total Income</th><th>Total Expenses</th><th>Balance</th></tr></thead>
+            <tbody id="monthlyBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Charts -->
+      <section class="card"><h3>Expense Breakdown (This Month)</h3><canvas id="expensePie" style="max-height:300px;"></canvas></section>
+      <section class="card"><h3>Income vs Expenses (Monthly)</h3><canvas id="monthlyBar" style="max-height:300px;"></canvas></section>
+    </div>
   </main>
 
   <!-- Chart.js -->
